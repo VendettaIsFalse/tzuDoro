@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tzu-modoro 🐾</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FFF8F2;
+    --warm: #FFE8CC;
+    --peach: #FFCBA4;
+    --blush: #F4A8C7;
+    --rose: #E8799F;
+    --rose-dark: #C9567E;
+    --brown: #8B5E3C;
+    --dark: #3A1A10;
+    --green: #7BC47F;
+    --mint: #E8F5E9;
+    --sky: #B3E0FF;
+    --gold: #FFD166;
+    --soft-shadow: 0 8px 40px rgba(232,121,159,0.18), 0 2px 12px rgba(0,0,0,0.06);
+    --card-border: 2px solid rgba(244,168,199,0.35);
+    --card-bg: rgba(255,255,255,0.92);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── BACKGROUND ────────────────────────────────── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 50% at 10% 5%, rgba(255,220,230,0.55) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 90% 90%, rgba(255,209,102,0.22) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,248,242,1) 0%, transparent 100%);
+  }
+
+  /* Floating paw prints */
+  .paw-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .paw {
+    position: absolute;
+    font-size: 1.4rem;
+    opacity: 0.06;
+    animation: pawDrift linear infinite;
+    user-select: none;
+  }
+  @keyframes pawDrift {
+    0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.07; }
+    90%  { opacity: 0.07; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────── */
+  .app {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    padding: 0 0 48px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 32px 24px 20px;
+  }
+  .logo {
+    font-family: 'Pacifico', cursive;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--rose);
+    filter: drop-shadow(2px 3px 0 rgba(232,121,159,0.25));
+    line-height: 1.1;
+    display: inline-block;
+  }
+  .tagline {
+    font-size: 0.85rem;
+    color: #c07870;
+    margin-top: 4px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN CONTENT ───────────────────────────────── */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 340px 280px;
+    gap: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    align-items: start;
+  }
+
+  /* ── CARD BASE ──────────────────────────────────── */
+  .card {
+    background: var(--card-bg);
+    border-radius: 28px;
+    border: var(--card-border);
+    box-shadow: var(--soft-shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  /* ── LEFT PANEL ─────────────────────────────────── */
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Pomo dots */
+  .pomo-card {
+    padding: 20px 22px;
+  }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 12px;
+  }
+  .pomo-dots {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .pomo-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(232,121,159,0.3);
+    background: rgba(232,121,159,0.08);
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+  .pomo-dot.done {
+    background: var(--rose);
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(232,121,159,0.25);
+  }
+  .pomo-dot.done::after {
+    content: '🐾';
+    position: absolute;
+    top: -8px; left: -4px;
+    font-size: 0.65rem;
+    animation: pawPop 0.4s ease;
+  }
+  @keyframes pawPop {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+    60% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .pomo-count-text {
+    font-size: 0.75rem;
+    color: #c07870;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+
+  /* Custom time card */
+  .custom-time-card {
+    padding: 20px 22px;
+  }
+  .time-presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .preset-btn {
+    padding: 7px 4px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(232,121,159,0.25);
+    background: rgba(255,248,242,0.8);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b07060;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .preset-btn:hover { background: rgba(244,168,199,0.2); border-color: var(--rose); color: var(--rose); }
+  .preset-btn.active {
+    background: var(--rose);
+    color: white;
+    border-color: var(--rose);
+    box-shadow: 0 2px 8px rgba(232,121,159,0.4);
+  }
+
+  .custom-input-row {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .custom-input-row label { font-size: 0.75rem; font-weight: 700; color: #b07060; flex-shrink: 0; }
+  .custom-input-row input[type=number] {
+    width: 60px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(232,121,159,0.3);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--dark);
+    background: white;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.18s;
+  }
+  .custom-input-row input[type=number]:focus { border-color: var(--rose); }
+  .custom-input-row span { font-size: 0.72rem; color: #c08060; font-weight: 600; }
+  .set-custom-btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--rose);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    margin-left: auto;
+  }
+  .set-custom-btn:hover { background: var(--rose-dark); }
+
+  /* Stats */
+  .stats-card { padding: 20px 22px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-item {
+    background: rgba(255,248,242,0.9);
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
+    border: 1px solid rgba(244,168,199,0.2);
+  }
+  .stat-val { font-size: 1.5rem; font-weight: 900; color: var(--rose); line-height: 1; }
+  .stat-lbl { font-size: 0.65rem; font-weight: 700; color: #c08060; margin-top: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  /* ── CENTER TIMER ───────────────────────────────── */
+  .timer-card {
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Mode tabs */
+  .mode-tabs {
+    display: flex; gap: 6px;
+    background: rgba(255,240,247,0.8);
+    border-radius: 16px;
+    padding: 5px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(244,168,199,0.25);
+  }
+  .mode-tab {
+    padding: 7px 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: #c08060;
+    white-space: nowrap;
+  }
+  .mode-tab.active {
+    background: white;
+    color: var(--rose);
+    box-shadow: 0 2px 8px rgba(232,121,159,0.2);
+  }
+
+  /* Progress ring + dog */
+  .ring-scene {
+    position: relative;
+    width: 260px; height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .progress-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+    pointer-events: none;
+  }
+  .ring-bg { fill: none; stroke: rgba(244,168,199,0.2); stroke-width: 10; }
+  .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+  .ring-pulse { fill: none; stroke-width: 10; stroke-linecap: round; opacity: 0; }
+
+  .dog-wrap {
+    position: relative;
+    width: 190px; height: 190px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1;
+  }
+  .dog-wrap svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* Hearts */
+  .heart-burst { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .heart {
+    position: absolute;
+    font-size: 1.2rem;
+    opacity: 0;
+    pointer-events: none;
+  }
+  @keyframes heartFloat {
+    0%   { opacity: 1; transform: translateY(0) scale(0.4) rotate(-10deg); }
+    50%  { opacity: 1; transform: translateY(-50px) scale(1.1) rotate(5deg); }
+    100% { opacity: 0; transform: translateY(-90px) scale(0.7) rotate(15deg); }
+  }
+  .heart.go { animation: heartFloat 1.2s ease-out forwards; }
+
+  /* Timer display */
+  .timer-display {
+    font-size: 4.2rem;
+    font-weight: 900;
+    color: var(--dark);
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--rose);
+    text-transform: uppercase;
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex; gap: 10px;
+    margin-bottom: 22px;
+  }
+  .btn {
+    padding: 11px 20px;
+    border-radius: 18px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-primary {
+    background: var(--rose);
+    color: white;
+    box-shadow: 0 4px 16px rgba(232,121,159,0.45);
+    padding: 11px 36px;
+    font-size: 1rem;
+  }
+  .btn-primary:hover { background: var(--rose-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,121,159,0.5); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-secondary {
+    background: rgba(255,240,247,0.9);
+    color: #c08060;
+    border: 1.5px solid rgba(244,168,199,0.35);
+  }
+  .btn-secondary:hover { background: rgba(244,168,199,0.25); }
+
+  /* Treats */
+  .treats-section { width: 100%; text-align: center; }
+  .treats-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #c08060;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .treats-row {
+    display: flex; flex-wrap: wrap; gap: 7px;
+    justify-content: center;
+    min-height: 36px;
+    padding: 4px;
+  }
+  .treat-item {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #FFE580, #FFD166);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    cursor: grab;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    border: 2px solid rgba(230,180,60,0.5);
+    box-shadow: 0 2px 8px rgba(255,209,102,0.4);
+    user-select: none;
+    animation: treatPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes treatPop {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .treat-item:hover { transform: scale(1.2) rotate(5deg); cursor: grab; }
+  .treat-item:active { cursor: grabbing; }
+  .treat-item.dragging { opacity: 0.4; transform: scale(0.9); }
+
+  .dog-wrap.drop-over {
+    filter: drop-shadow(0 0 16px rgba(255,209,102,0.8));
+  }
+  .dog-wrap.drop-over::after {
+    content: '🦴 Drop it!';
+    position: absolute;
+    bottom: -28px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--rose);
+    white-space: nowrap;
+  }
+
+  /* ── RIGHT PANEL: COMFORT CORNER ────────────────── */
+  .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .comfort-card { padding: 22px 20px; }
+
+  .mini-dog-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 16px;
+  }
+  .mini-dog-svg-wrap {
+    width: 80px; height: 80px;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .mini-dog-svg-wrap:hover { transform: scale(1.1); }
+  .mini-dog-svg-wrap svg { width: 100%; height: 100%; overflow: visible; }
+  .mini-heart-burst { position: absolute; inset: 0; pointer-events: none; }
+
+  .mini-dog-text {
+    font-size: 0.75rem;
+    color: #b07060;
+    line-height: 1.5;
+    font-weight: 600;
+    text-align: center;
+    max-width: 200px;
+  }
+
+  .pet-btn {
+    width: 100%;
+    padding: 9px;
+    border-radius: 14px;
+    border: 2px dashed rgba(244,168,199,0.6);
+    background: rgba(255,240,247,0.7);
+    color: var(--rose);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 18px;
+  }
+  .pet-btn:hover {
+    background: rgba(244,168,199,0.25);
+    border-style: solid;
+    transform: translateY(-1px);
+  }
+
+  /* Envelope grid */
+  .env-section-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c08060;
+    margin-bottom: 10px;
+  }
+  .env-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .env-item {
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: 14px;
+    transition: all 0.18s;
+    border: 1.5px solid transparent;
+    background: rgba(255,248,242,0.5);
+  }
+  .env-item:hover {
+    background: rgba(255,240,247,0.9);
+    border-color: rgba(244,168,199,0.5);
+    transform: translateY(-2px);
+  }
+  .env-icon { font-size: 1.7rem; margin-bottom: 3px; }
+  .env-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #c08060;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .env-item.read .env-icon { filter: saturate(1.4); }
+
+  /* Mood card */
+  .mood-card { padding: 18px 20px; }
+  .mood-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .mood-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(244,168,199,0.3);
+    background: rgba(255,248,242,0.8);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b07060;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .mood-btn:hover { background: rgba(244,168,199,0.25); border-color: var(--rose); color: var(--rose); transform: scale(1.05); }
+
+  /* ── MODAL ──────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(58,26,16,0.3);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white;
+    border-radius: 32px;
+    padding: 36px 32px;
+    max-width: 400px;
+    width: 92%;
+    box-shadow: 0 24px 80px rgba(232,121,159,0.3);
+    border: 2px solid rgba(244,168,199,0.4);
+    transform: scale(0.88) translateY(24px);
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+  .modal-deco {
+    position: absolute; top: 0; right: 0; left: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--blush), var(--rose), var(--gold), var(--blush));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+  .modal-emoji { font-size: 3rem; margin-bottom: 14px; }
+  .modal-from {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 6px;
+  }
+  .modal-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.4rem;
+    color: var(--dark);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .modal-msg {
+    font-size: 0.9rem;
+    color: #7a5040;
+    line-height: 1.8;
+    margin-bottom: 24px;
+    white-space: pre-line;
+  }
+  .modal-close {
+    width: 100%;
+    padding: 13px;
+    border-radius: 18px;
+    border: none;
+    background: var(--rose);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 4px 16px rgba(232,121,159,0.4);
+  }
+  .modal-close:hover { background: var(--rose-dark); transform: translateY(-1px); }
+
+  /* ── TOAST ──────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--dark);
+    color: white;
+    padding: 13px 28px;
+    border-radius: 22px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    z-index: 600;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    box-shadow: 0 8px 28px rgba(58,26,16,0.25);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── DOG ANIMATIONS ─────────────────────────────── */
+  @keyframes tailWag {
+    0%, 100% { transform: rotate(-20deg); }
+    50%       { transform: rotate(20deg); }
+  }
+  @keyframes earBounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+  }
+  @keyframes dogBreathe {
+    0%, 100% { transform: scaleY(1) scaleX(1); }
+    50%       { transform: scaleY(1.03) scaleX(1.01); }
+  }
+  @keyframes zFloat {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.5); }
+    25%  { opacity: 1; }
+    75%  { opacity: 0.7; transform: translate(-10px,-28px) scale(1.1); }
+    100% { opacity: 0; transform: translate(-14px,-38px) scale(0.5); }
+  }
+  @keyframes munchBounce {
+    0%,100% { transform: scale(1); }
+    30%     { transform: scale(1.06); }
+    70%     { transform: scale(0.97); }
+  }
+
+  /* ── RESPONSIVE ─────────────────────────────────── */
+  @media (max-width: 1000px) {
+    .main { grid-template-columns: 1fr 300px; }
+    .left-panel { order: 3; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  }
+  @media (max-width: 680px) {
+    .main { grid-template-columns: 1fr; padding: 0 14px; }
+    .left-panel { grid-template-columns: 1fr 1fr; }
+    .ring-scene { width: 220px; height: 220px; }
+    .timer-display { font-size: 3.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="paw-bg" id="pawBg"></div>
+
+<div class="app">
+  <header>
+    <div class="logo">Tzu-modoro 🐾</div>
+    <div class="tagline">Study with your fluffiest study buddy</div>
+  </header>
+
+  <div class="main">
+
+    <!-- ── LEFT PANEL ─────────────────────────── -->
+    <div class="left-panel">
+
+      <!-- Pomo tracker -->
+      <div class="card pomo-card">
+        <div class="section-label">🍅 Pomodoros</div>
+        <div class="pomo-dots" id="pomoDots"></div>
+        <div class="pomo-count-text" id="pomoCountText">0 complete — you got this!</div>
+      </div>
+
+      <!-- Custom time -->
+      <div class="card custom-time-card">
+        <div class="section-label">⏱ Set your timer</div>
+        <div class="time-presets" id="presetBtns">
+          <button class="preset-btn active" onclick="applyPreset(this,25,'focus')">25 min</button>
+          <button class="preset-btn" onclick="applyPreset(this,50,'focus')">50 min</button>
+          <button class="preset-btn" onclick="applyPreset(this,90,'focus')">90 min</button>
+          <button class="preset-btn" onclick="applyPreset(this,5,'short')">5 min ☕</button>
+          <button class="preset-btn" onclick="applyPreset(this,10,'short')">10 min ☕</button>
+          <button class="preset-btn" onclick="applyPreset(this,15,'long')">15 min 🌸</button>
+        </div>
+        <div class="custom-input-row">
+          <label>Custom:</label>
+          <input type="number" id="customMins" min="1" max="180" placeholder="mins" value="">
+          <span>mins</span>
+          <button class="set-custom-btn" onclick="applyCustom()">Set ✓</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card stats-card">
+        <div class="section-label">📊 Today</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-val" id="statPomos">0</div>
+            <div class="stat-lbl">Sessions</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="statTreats">0</div>
+            <div class="stat-lbl">Treats earned</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="statMins">0</div>
+            <div class="stat-lbl">Mins focused</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="statPets">0</div>
+            <div class="stat-lbl">Pets given</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── CENTER TIMER ────────────────────────── -->
+    <div class="card timer-card">
+
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tab-focus" onclick="setMode('focus')">🎯 Focus</button>
+        <button class="mode-tab" id="tab-short" onclick="setMode('short')">☕ Short break</button>
+        <button class="mode-tab" id="tab-long"  onclick="setMode('long')">🌸 Long break</button>
+      </div>
+
+      <!-- Ring + Dog -->
+      <div class="ring-scene">
+        <svg class="progress-svg" viewBox="0 0 260 260">
+          <circle class="ring-bg" cx="130" cy="130" r="118"/>
+          <circle class="ring-fill" id="ringFill" cx="130" cy="130" r="118"
+            stroke-dasharray="741.1" stroke-dashoffset="0" stroke="#E8799F"/>
+        </svg>
+
+        <div class="dog-wrap" id="dogWrap"
+          onclick="onDogClick()"
+          ondragover="event.preventDefault(); this.classList.add('drop-over')"
+          ondragleave="this.classList.remove('drop-over')"
+          ondrop="dropTreat(event)">
+
+          <div class="heart-burst" id="heartBurst"></div>
+
+          <svg id="dogSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="overflow:visible; width:100%;height:100%">
+
+            <!-- ══ SLEEPING DOG ══ -->
+            <g id="dogSleep">
+              <!-- body breathing -->
+              <ellipse cx="100" cy="148" rx="60" ry="36"
+                fill="#D4A473"
+                style="transform-origin:100px 160px; animation: dogBreathe 3.5s ease-in-out infinite"/>
+              <!-- tail -->
+              <ellipse cx="152" cy="158" rx="18" ry="10" fill="#C49060"
+                transform="rotate(25,152,158)"/>
+              <!-- back legs peeking -->
+              <ellipse cx="68" cy="172" rx="12" ry="7" fill="#C08040" transform="rotate(-15,68,172)"/>
+              <ellipse cx="134" cy="172" rx="12" ry="7" fill="#C08040" transform="rotate(15,134,172)"/>
+              <!-- head resting -->
+              <ellipse cx="82" cy="120" rx="40" ry="36" fill="#D4A473"/>
+              <!-- left ear drooping -->
+              <ellipse cx="52" cy="108" rx="17" ry="30" fill="#C08040"
+                transform="rotate(-15,52,108)"/>
+              <!-- right ear -->
+              <ellipse cx="114" cy="104" rx="15" ry="26" fill="#C08040"
+                transform="rotate(10,114,104)"/>
+              <!-- forehead floof -->
+              <ellipse cx="82" cy="98" rx="22" ry="14" fill="#E0B88A"/>
+              <!-- snout area -->
+              <ellipse cx="78" cy="134" rx="22" ry="14" fill="#C49060"/>
+              <!-- nose -->
+              <ellipse cx="78" cy="128" rx="8" ry="6" fill="#7A3018"/>
+              <!-- closed eyes / sleeping lines -->
+              <path d="M63 116 Q70 111 78 116" fill="none" stroke="#7A3018" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M86 113 Q92 109 98 113" fill="none" stroke="#7A3018" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- eyelashes -->
+              <line x1="64" y1="116" x2="62" y2="113" stroke="#7A3018" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="78" y1="115" x2="79" y2="112" stroke="#7A3018" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- slight smile -->
+              <path d="M70 140 Q78 145 86 140" fill="none" stroke="#C08040" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Zzz -->
+              <text x="126" y="92" font-size="17" fill="#E8799F" font-family="Nunito,sans-serif" font-weight="800"
+                style="animation: zFloat 2.8s ease-in-out 0s infinite">Z</text>
+              <text x="140" y="74" font-size="13" fill="#f4a8c7" font-family="Nunito,sans-serif" font-weight="800"
+                style="animation: zFloat 2.8s ease-in-out 0.9s infinite">Z</text>
+              <text x="153" y="60" font-size="9" fill="#fde8f5" font-family="Nunito,sans-serif" font-weight="800"
+                style="animation: zFloat 2.8s ease-in-out 1.7s infinite">Z</text>
+            </g>
+
+            <!-- ══ AWAKE DOG ══ -->
+            <g id="dogAwake" style="display:none">
+              <!-- body -->
+              <ellipse cx="100" cy="150" rx="58" ry="34" fill="#D4A473"/>
+              <!-- wagging tail -->
+              <g style="transform-origin:145px 150px; animation: tailWag 0.45s ease-in-out infinite">
+                <ellipse cx="156" cy="140" rx="16" ry="9" fill="#C08040" transform="rotate(-35,156,140)"/>
+              </g>
+              <!-- legs -->
+              <rect x="63"  y="172" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="84"  y="174" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="105" y="174" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="126" y="172" width="15" height="24" rx="7" fill="#C49060"/>
+              <!-- head -->
+              <ellipse cx="78" cy="110" rx="42" ry="40" fill="#D4A473"/>
+              <!-- forehead floof -->
+              <ellipse cx="78" cy="86" rx="26" ry="18" fill="#E0B88A"/>
+              <!-- ears bouncing -->
+              <g style="transform-origin:46px 100px; animation: earBounce 0.55s ease-in-out infinite">
+                <ellipse cx="46" cy="97" rx="19" ry="32" fill="#C08040" transform="rotate(-15,46,97)"/>
+              </g>
+              <g style="transform-origin:114px 96px; animation: earBounce 0.55s ease-in-out 0.18s infinite">
+                <ellipse cx="114" cy="93" rx="17" ry="29" fill="#C08040" transform="rotate(12,114,93)"/>
+              </g>
+              <!-- snout -->
+              <ellipse cx="76" cy="125" rx="22" ry="16" fill="#C49060"/>
+              <!-- nose -->
+              <ellipse cx="76" cy="119" rx="9" ry="7" fill="#7A3018"/>
+              <!-- eyes: whites -->
+              <ellipse cx="61" cy="105" rx="9" ry="10" fill="white"/>
+              <ellipse cx="95" cy="105" rx="9" ry="10" fill="white"/>
+              <!-- pupils -->
+              <ellipse cx="62" cy="107" rx="6" ry="6" fill="#2A0E04"/>
+              <ellipse cx="96" cy="107" rx="6" ry="6" fill="#2A0E04"/>
+              <!-- catchlights -->
+              <ellipse cx="60" cy="105" rx="2" ry="2.5" fill="white"/>
+              <ellipse cx="94" cy="105" rx="2" ry="2.5" fill="white"/>
+              <!-- tongue -->
+              <ellipse cx="76" cy="136" rx="8" ry="9" fill="#F07070"/>
+              <line x1="76" y1="133" x2="76" y2="142" stroke="#D05050" stroke-width="1.5"/>
+              <!-- happy blush -->
+              <ellipse cx="48" cy="120" rx="9" ry="5" fill="rgba(240,120,120,0.2)"/>
+              <ellipse cx="108" cy="120" rx="9" ry="5" fill="rgba(240,120,120,0.2)"/>
+            </g>
+
+            <!-- ══ EATING DOG ══ -->
+            <g id="dogEat" style="display:none">
+              <ellipse cx="100" cy="150" rx="58" ry="34" fill="#D4A473"
+                style="animation: munchBounce 0.45s ease-in-out infinite"/>
+              <g style="transform-origin:145px 150px; animation: tailWag 0.25s ease-in-out infinite">
+                <ellipse cx="156" cy="140" rx="16" ry="9" fill="#C08040" transform="rotate(-35,156,140)"/>
+              </g>
+              <rect x="63"  y="172" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="84"  y="174" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="105" y="174" width="15" height="24" rx="7" fill="#C49060"/>
+              <rect x="126" y="172" width="15" height="24" rx="7" fill="#C49060"/>
+              <ellipse cx="78" cy="110" rx="42" ry="40" fill="#D4A473"/>
+              <ellipse cx="78" cy="86" rx="26" ry="18" fill="#E0B88A"/>
+              <ellipse cx="46" cy="97" rx="19" ry="32" fill="#C08040" transform="rotate(-15,46,97)"/>
+              <ellipse cx="114" cy="93" rx="17" ry="29" fill="#C08040" transform="rotate(12,114,93)"/>
+              <ellipse cx="76" cy="125" rx="22" ry="16" fill="#C49060"/>
+              <ellipse cx="76" cy="119" rx="9" ry="7" fill="#7A3018"/>
+              <!-- squinting happy eyes -->
+              <path d="M52 104 Q61 98 70 104" fill="none" stroke="#2A0E04" stroke-width="3" stroke-linecap="round"/>
+              <path d="M86 103 Q95 97 104 103" fill="none" stroke="#2A0E04" stroke-width="3" stroke-linecap="round"/>
+              <!-- open mouth with treat -->
+              <path d="M60 132 Q76 146 92 132" fill="#F07070" stroke="#C05050" stroke-width="1"/>
+              <ellipse cx="76" cy="136" rx="10" ry="6" fill="#FFD166"/>
+              <!-- blush stronger -->
+              <ellipse cx="46" cy="118" rx="11" ry="6" fill="rgba(240,100,100,0.3)"/>
+              <ellipse cx="110" cy="118" rx="11" ry="6" fill="rgba(240,100,100,0.3)"/>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+
+      <!-- Timer text (outside ring) -->
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div class="timer-label" id="timerLabel">Focus time — you got this! 🐾</div>
+
+      <div style="height:18px"></div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="resetTimer()">↺ Reset</button>
+        <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+        <button class="btn btn-secondary" onclick="skipSession()">⟩⟩ Skip</button>
+      </div>
+
+      <!-- Treats -->
+      <div class="treats-section">
+        <div class="treats-label" id="treatsLabel">Complete a focus session to earn treats 🦴</div>
+        <div class="treats-row" id="treatsRow"></div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT PANEL ─────────────────────────── -->
+    <div class="right-panel">
+
+      <!-- Comfort corner -->
+      <div class="card comfort-card">
+        <div class="section-label">💌 Comfort Corner</div>
+
+        <div class="mini-dog-area">
+          <div class="mini-dog-svg-wrap" id="miniDogWrap" onclick="petMiniDog()" title="Click to pet!">
+            <div class="mini-heart-burst" id="miniHeartBurst"></div>
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+              <ellipse cx="50" cy="68" rx="32" ry="20" fill="#D4A473"/>
+              <g style="transform-origin:78px 68px; animation: tailWag 0.7s ease-in-out infinite">
+                <ellipse cx="82" cy="62" rx="12" ry="7" fill="#C08040" transform="rotate(-20,82,62)"/>
+              </g>
+              <ellipse cx="28" cy="52" rx="13" ry="22" fill="#C08040" transform="rotate(-12,28,52)"/>
+              <ellipse cx="70" cy="50" rx="12" ry="20" fill="#C08040" transform="rotate(12,70,50)"/>
+              <ellipse cx="48" cy="48" rx="26" ry="25" fill="#D4A473"/>
+              <ellipse cx="48" cy="36" rx="16" ry="11" fill="#E0B88A"/>
+              <ellipse cx="48" cy="60" rx="16" ry="10" fill="#C49060"/>
+              <ellipse cx="48" cy="56" rx="6" ry="5" fill="#7A3018"/>
+              <ellipse cx="37" cy="44" rx="6" ry="7" fill="white"/>
+              <ellipse cx="37" cy="46" rx="4" ry="4" fill="#2A0E04"/>
+              <ellipse cx="36" cy="44" rx="1.5" ry="2" fill="white"/>
+              <ellipse cx="59" cy="44" rx="6" ry="7" fill="white"/>
+              <ellipse cx="59" cy="46" rx="4" ry="4" fill="#2A0E04"/>
+              <ellipse cx="58" cy="44" rx="1.5" ry="2" fill="white"/>
+              <ellipse cx="48" cy="68" rx="5" ry="6" fill="#F07070"/>
+              <ellipse cx="30" cy="58" rx="6" ry="3" fill="rgba(240,120,120,0.25)"/>
+              <ellipse cx="66" cy="58" rx="6" ry="3" fill="rgba(240,120,120,0.25)"/>
+            </svg>
+          </div>
+          <div class="mini-dog-text">Feeling overwhelmed? Pet me and I'll fetch you a special letter 🌸</div>
+        </div>
+
+        <button class="pet-btn" onclick="petMiniDog()">🐾 Pet & fetch a letter</button>
+
+        <div class="env-section-label">Your letter collection:</div>
+        <div class="env-grid" id="envGrid"></div>
+      </div>
+
+      <!-- Mood quick-open -->
+      <div class="card mood-card">
+        <div class="section-label">💭 How are you feeling?</div>
+        <div class="mood-buttons" id="moodButtons"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="onOverlayClick(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-deco"></div>
+    <div class="modal-emoji" id="modalEmoji">💌</div>
+    <div class="modal-from">A letter, just for you 🐾</div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-msg"   id="modalMsg"></div>
+    <button class="modal-close" onclick="closeModal()">Give the pup a pat 🐾</button>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  LETTERS / ENVELOPES
+// ═══════════════════════════════════════════════════════════
+const LETTERS = [
+  {
+    id: 0, icon: '🌸', label: 'Stressed',
+    emoji: '🌸', title: 'Hey, breathe.',
+    msg: `Stressed means you care — and that's actually beautiful.
+
+But right now, close your eyes for five seconds. Feel the chair beneath you. Hear the room. You are okay.
+
+You don't have to do everything perfectly. You just have to do the next small thing. That's it. One tiny step. You've already done harder things than this without even noticing.
+
+Your Shih Tzu believes in you. So do I. 🐾`
+  },
+  {
+    id: 1, icon: '☁️', label: 'Stuck',
+    emoji: '☁️', title: 'Being stuck is okay.',
+    msg: `Every single person who has ever done something meaningful got stuck — sometimes for a very long time.
+
+Stuck isn't failure. Stuck is just the part right before the breakthrough.
+
+Try this: close your laptop for three minutes. Walk around. Splash cold water on your face. Your brain needs a tiny reset, not more pressure.
+
+When you come back, the answer is almost always clearer. Trust the process. You're not behind — you're just mid-climb. 🌿`
+  },
+  {
+    id: 2, icon: '💛', label: 'Tired',
+    emoji: '💛', title: 'Rest is productive.',
+    msg: `You cannot pour from an empty cup. And you've been pouring a lot lately.
+
+Being tired doesn't mean you're weak. It means you've been working. That's worth recognizing.
+
+Give yourself this break fully — not half-resting while scrolling, but really resting. Let your mind go quiet.
+
+When you return, you'll be sharper. Resting isn't quitting. It's part of the plan. 💛`
+  },
+  {
+    id: 3, icon: '🌙', label: 'Late night',
+    emoji: '🌙', title: 'Still up? That\'s dedication.',
+    msg: `Late nights have a particular kind of magic, don't they? The quiet house, the soft glow of your screen, just you and the work.
+
+You're still here, and that matters. But please take care of yourself too — drink some water, stretch, blink for a moment.
+
+Somewhere right now, someone else is also working toward something meaningful. And you are one of them.
+
+Finish this session strong, then sleep. Tomorrow-you will be so grateful. 🌙`
+  },
+  {
+    id: 4, icon: '🎉', label: 'Celebrating',
+    emoji: '🎉', title: 'Look at you go!',
+    msg: `Wait — stop for a second. Look how far you've come.
+
+You showed up. You did the thing. Even on the days it felt impossible, you found a way.
+
+Celebrating small wins isn't silly — it's how you keep going. Today's little victory is tomorrow's foundation.
+
+Do a tiny happy dance. Feed the digital Shih Tzu a treat. You have absolutely earned this moment. 🎉🐾`
+  },
+  {
+    id: 5, icon: '💌', label: 'Lonely',
+    emoji: '💌', title: 'You\'re not alone.',
+    msg: `Sometimes studying feels incredibly isolating — like everyone else has it figured out and you're the only one struggling quietly.
+
+But that is just not true. Millions of people right now are sitting with their books and their doubts and their silent little battles, just like you.
+
+You are part of a whole world of people who are trying. And the fact that you're trying — quietly, consistently — says everything about who you are.
+
+I'm here with you. So is this fluffy little dog. You're not as alone as it feels. 💌`
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const MODES = {
+  focus: { label: 'Focus time — you got this! 🐾', mins: 25, color: '#E8799F' },
+  short: { label: 'Short break — wake the pup! ☕', mins: 5,  color: '#7BC47F' },
+  long:  { label: 'Long break — snuggle time! 🌸',  mins: 15, color: '#6BAED6' },
+};
+
+let mode          = 'focus';
+let secondsLeft   = 25 * 60;
+let totalSeconds  = 25 * 60;
+let running       = false;
+let timerInterval = null;
+let treats        = 0;
+let pomosComplete = 0;
+let totalMinsFocused = 0;
+let totalPets     = 0;
+let openedSet     = new Set();
+let toastTimer    = null;
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+(function init() {
+  spawnPaws();
+  renderPomoDots();
+  renderEnvelopes();
+  renderMoodButtons();
+  updateDisplay();
+  renderDog();
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  FLOATING PAWS
+// ═══════════════════════════════════════════════════════════
+function spawnPaws() {
+  const container = document.getElementById('pawBg');
+  const paws = ['🐾','🐾','🐾','🐾','🐾','🐾','🐾','🐾','🐾','🐾'];
+  paws.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'paw';
+    el.textContent = p;
+    el.style.left  = (Math.random() * 100) + 'vw';
+    el.style.animationDuration = (20 + Math.random() * 25) + 's';
+    el.style.animationDelay   = (Math.random() * -30) + 's';
+    el.style.fontSize = (0.9 + Math.random() * 1.4) + 'rem';
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODE & PRESETS
+// ═══════════════════════════════════════════════════════════
+function setMode(m, customMins) {
+  mode    = m;
+  running = false;
+  clearInterval(timerInterval);
+  document.getElementById('startBtn').textContent = '▶ Start';
+
+  const mins = customMins || MODES[m].mins;
+  secondsLeft  = mins * 60;
+  totalSeconds = mins * 60;
+
+  document.getElementById('timerLabel').textContent = MODES[m].label;
+  document.getElementById('ringFill').style.stroke  = MODES[m].color;
+
+  ['focus','short','long'].forEach(id => {
+    document.getElementById('tab-'+id).classList.toggle('active', id === m);
+  });
+
+  updateDisplay();
+  renderDog();
+}
+
+function applyPreset(btn, mins, modeKey) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  setMode(modeKey, mins);
+  showToast(`⏱ Timer set to ${mins} minutes!`);
+}
+
+function applyCustom() {
+  const val = parseInt(document.getElementById('customMins').value);
+  if (!val || val < 1 || val > 180) {
+    showToast('⚠️ Please enter 1–180 minutes!');
+    return;
+  }
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const modeKey = val <= 20 ? 'short' : val <= 60 ? 'focus' : 'long';
+  setMode(modeKey, val);
+  showToast(`⏱ Custom timer set to ${val} minutes!`);
+  document.getElementById('customMins').value = '';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TIMER LOGIC
+// ═══════════════════════════════════════════════════════════
+function toggleTimer() {
+  if (running) {
+    clearInterval(timerInterval);
+    running = false;
+    document.getElementById('startBtn').textContent = '▶ Start';
+  } else {
+    running = true;
+    document.getElementById('startBtn').textContent = '⏸ Pause';
+    timerInterval = setInterval(tick, 1000);
+  }
+}
+
+function tick() {
+  if (secondsLeft <= 0) {
+    clearInterval(timerInterval);
+    running = false;
+    onSessionComplete();
+    return;
+  }
+  secondsLeft--;
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  document.getElementById('timerDisplay').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+  const circ    = 2 * Math.PI * 118; // 741.1
+  const ratio   = secondsLeft / totalSeconds;
+  document.getElementById('ringFill').style.strokeDashoffset = circ * ratio;
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  running = false;
+  document.getElementById('startBtn').textContent = '▶ Start';
+  secondsLeft = totalSeconds;
+  updateDisplay();
+  renderDog();
+}
+
+function skipSession() {
+  clearInterval(timerInterval);
+  running = false;
+  document.getElementById('startBtn').textContent = '▶ Start';
+  onSessionComplete();
+}
+
+function onSessionComplete() {
+  playWoof();
+  if (mode === 'focus') {
+    treats++;
+    pomosComplete++;
+    totalMinsFocused += Math.round(totalSeconds / 60);
+    updateStats();
+    renderTreats();
+    renderPomoDots();
+    showToast('🎉 Session complete! You earned a treat! Drag it to the pup!');
+    setTimeout(() => setMode('short'), 400);
+  } else {
+    showToast('🎯 Break over! Time to focus again!');
+    setTimeout(() => setMode('focus'), 400);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('statPomos').textContent  = pomosComplete;
+  document.getElementById('statTreats').textContent = treats;
+  document.getElementById('statMins').textContent   = totalMinsFocused;
+  document.getElementById('statPets').textContent   = totalPets;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DOG RENDER
+// ═══════════════════════════════════════════════════════════
+function renderDog(state) {
+  const s = state || (mode === 'focus' ? 'sleep' : 'awake');
+  document.getElementById('dogSleep').style.display = s === 'sleep'  ? 'block' : 'none';
+  document.getElementById('dogAwake').style.display = s === 'awake'  ? 'block' : 'none';
+  document.getElementById('dogEat').style.display   = s === 'eat'    ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DOG INTERACTION
+// ═══════════════════════════════════════════════════════════
+function onDogClick() {
+  if (mode === 'focus') {
+    showToast('😴 Shh! The pup is sleeping! Click during break time!');
+    return;
+  }
+  totalPets++;
+  updateStats();
+  spawnHearts('heartBurst');
+  playHeartSound();
+}
+
+function petMiniDog() {
+  const wrap = document.getElementById('miniDogWrap');
+  wrap.style.transform = 'scale(1.18)';
+  setTimeout(() => { wrap.style.transform = ''; }, 380);
+  spawnHearts('miniHeartBurst');
+  totalPets++;
+  updateStats();
+
+  // pick unread letter preferentially
+  const unread = LETTERS.filter(l => !openedSet.has(l.id));
+  const pool   = unread.length > 0 ? unread : LETTERS;
+  openLetter(pool[Math.floor(Math.random() * pool.length)]);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TREATS
+// ═══════════════════════════════════════════════════════════
+function renderTreats() {
+  const row = document.getElementById('treatsRow');
+  row.innerHTML = '';
+  document.getElementById('treatsLabel').textContent =
+    treats === 0
+      ? 'Complete a focus session to earn treats 🦴'
+      : `🦴 ${treats} treat${treats > 1 ? 's' : ''} earned — drag to the pup during break!`;
+
+  for (let i = 0; i < treats; i++) {
+    const t = document.createElement('div');
+    t.className  = 'treat-item';
+    t.textContent = '🦴';
+    t.draggable  = true;
+    t.style.animationDelay = (i * 0.07) + 's';
+    t.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('treat', '1');
+      t.classList.add('dragging');
+    });
+    t.addEventListener('dragend', () => t.classList.remove('dragging'));
+    // also tap/click to feed
+    t.addEventListener('click', () => {
+      if (mode !== 'focus') feedDog();
+    });
+    row.appendChild(t);
+  }
+}
+
+function dropTreat(e) {
+  e.preventDefault();
+  document.getElementById('dogWrap').classList.remove('drop-over');
+  if (mode === 'focus') { showToast('😴 The pup is asleep! Feed during breaks!'); return; }
+  if (treats <= 0)       { showToast('No treats left!'); return; }
+  feedDog();
+}
+
+function feedDog() {
+  treats--;
+  updateStats();
+  renderTreats();
+  playMunch();
+  renderDog('eat');
+  spawnHearts('heartBurst');
+  showToast('😋 Nom nom! The pup loved that!');
+  setTimeout(() => renderDog('awake'), 1800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HEARTS
+// ═══════════════════════════════════════════════════════════
+function spawnHearts(containerId) {
+  const burst = document.getElementById(containerId);
+  burst.innerHTML = '';
+  const emojis  = ['💗','💕','💖','🌸','✨'];
+  const count   = 6;
+  for (let i = 0; i < count; i++) {
+    const h = document.createElement('div');
+    h.className   = 'heart';
+    h.textContent = emojis[i % emojis.length];
+    h.style.left  = (15 + Math.random() * 70) + '%';
+    h.style.top   = (10 + Math.random() * 50) + '%';
+    h.style.animationDelay = (i * 0.1) + 's';
+    burst.appendChild(h);
+    setTimeout(() => h.classList.add('go'), 10 + i * 50);
+    setTimeout(() => h.remove(), 1500 + i * 100);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  POMO DOTS
+// ═══════════════════════════════════════════════════════════
+function renderPomoDots() {
+  const container = document.getElementById('pomoDots');
+  container.innerHTML = '';
+  const total = Math.max(4, Math.ceil(pomosComplete / 4) * 4);
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'pomo-dot' + (i < pomosComplete ? ' done' : '');
+    container.appendChild(d);
+  }
+  document.getElementById('pomoCountText').textContent =
+    pomosComplete === 0
+      ? '0 complete — you got this!'
+      : `${pomosComplete} pomodoro${pomosComplete > 1 ? 's' : ''} complete! 🎉`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ENVELOPES
+// ═══════════════════════════════════════════════════════════
+function renderEnvelopes() {
+  const grid = document.getElementById('envGrid');
+  grid.innerHTML = '';
+  LETTERS.forEach(letter => {
+    const read = openedSet.has(letter.id);
+    const item = document.createElement('div');
+    item.className = 'env-item' + (read ? ' read' : '');
+    item.title     = letter.label;
+    item.innerHTML = `<div class="env-icon">${read ? letter.icon : '📨'}</div>
+                      <div class="env-label">${letter.label}</div>`;
+    item.onclick   = () => openLetter(letter);
+    grid.appendChild(item);
+  });
+}
+
+function openLetter(letter) {
+  openedSet.add(letter.id);
+  renderEnvelopes();
+  document.getElementById('modalEmoji').textContent = letter.emoji;
+  document.getElementById('modalTitle').textContent = letter.title;
+  document.getElementById('modalMsg').textContent   = letter.msg;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MOOD BUTTONS (quick-launch letters)
+// ═══════════════════════════════════════════════════════════
+function renderMoodButtons() {
+  const wrap = document.getElementById('moodButtons');
+  const moods = [
+    { label: '😤 Stressed',    id: 0 },
+    { label: '🤔 Stuck',       id: 1 },
+    { label: '😴 Tired',       id: 2 },
+    { label: '🌙 Late night',  id: 3 },
+    { label: '🎉 Winning!',    id: 4 },
+    { label: '🥺 Lonely',      id: 5 },
+  ];
+  moods.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className   = 'mood-btn';
+    btn.textContent = m.label;
+    btn.onclick     = () => openLetter(LETTERS[m.id]);
+    wrap.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════
+function onOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUDIO (Web Audio API — synthetic)
+// ═══════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playWoof() {
+  try {
+    const ctx = getAudioCtx();
+    const t   = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, t);
+    osc.frequency.exponentialRampToValueAtTime(290, t + 0.13);
+    osc.frequency.exponentialRampToValueAtTime(390, t + 0.24);
+    osc.frequency.exponentialRampToValueAtTime(240, t + 0.40);
+    gain.gain.setValueAtTime(0.38, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.44);
+    osc.start(t); osc.stop(t + 0.46);
+  } catch(e) {}
+}
+
+function playMunch() {
+  try {
+    const ctx = getAudioCtx();
+    for (let i = 0; i < 5; i++) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t    = ctx.currentTime + i * 0.14;
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(180 + Math.random() * 90, t);
+      osc.frequency.exponentialRampToValueAtTime(70, t + 0.09);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+      osc.start(t); osc.stop(t + 0.12);
+    }
+  } catch(e) {}
+}
+
+function playHeartSound() {
+  try {
+    const ctx = getAudioCtx();
+    const t   = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(660, t);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(660, t + 0.18);
+    gain.gain.setValueAtTime(0.22, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    osc.start(t); osc.stop(t + 0.24);
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
